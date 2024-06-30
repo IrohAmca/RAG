@@ -1,4 +1,1 @@
-from connect_mongo.connect import connect
-
-# Connect to the database
-connect()
+from connect_mongo.connect import local_db,server_db
