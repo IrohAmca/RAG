@@ -1,18 +1,31 @@
-from utils.setup import  setup_sim_st
-
+from utils.setup import  setup_model
+import torch
+import torch.nn.functional as F
 class SentenceSim:
     def __init__(self,name):
-        self.sim = setup_sim_st(name)
+        self.model ,self.tokenizer = setup_model(name)
     
-    def get_sim_score(self, query, text):
-        return self.sim.encode(query, text)
+    def mean_pooling(self, model_output, attention_mask):
+        token_embeddings = model_output[0]
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
-    def get_label(self, query, rag_dict):
-        max_score = 0
-        max_label = ""
-        for key in rag_dict:
-            score = self.get_sim_score(query, rag_dict[key])
-            if score > max_score:
-                max_score = score
-                max_label = key
-        return max_label
+    def get_sentence_embedding(self, sentence):
+        encoded_input = self.tokenizer(sentence, padding=True, truncation=True, return_tensors='pt')
+        with torch.no_grad():
+            model_output = self.model(**encoded_input)
+        sentence_embedding = self.mean_pooling(model_output, encoded_input['attention_mask'])
+        return sentence_embedding
+
+    def find_most_similar_sentences(self, sentences1, sentences2, top_k=5):
+        embeddings1 = torch.vstack([self.get_sentence_embedding(sentence) for sentence in sentences1])
+        embeddings2 = torch.vstack([self.get_sentence_embedding(sentence) for sentence in sentences2])
+
+        similarities = []
+        for i, embedding1 in enumerate(embeddings1):
+            for j, embedding2 in enumerate(embeddings2):
+                similarity = F.cosine_similarity(embedding1.unsqueeze(0), embedding2.unsqueeze(0))
+                similarities.append((sentences1[i], sentences2[j], similarity.item()))
+
+        sorted_similarities = sorted(similarities, key=lambda x: x[2], reverse=True)[:top_k]
+        return sorted_similarities

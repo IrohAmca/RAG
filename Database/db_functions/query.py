@@ -1,5 +1,3 @@
-from connect_mongo.connect import local_db
-
 def find(client,database, collection,data):
     db = client[database]
     collection = db[collection]

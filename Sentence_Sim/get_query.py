@@ -1,8 +1,7 @@
 from Database.db_functions.query import find,find_one
-from RAG.utils.special_name import find_special
+from utils.special_name import find_special
 
-def get_query(client, database, collection, data):
-    special = find_special(result)
+def get_query(client,SIM, database, collection, special,data):
     result = find_one(client, database, collection, special)
     
     if result.get(data) != None:

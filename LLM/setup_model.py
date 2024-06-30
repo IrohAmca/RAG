@@ -1,8 +1,8 @@
-from RAG.utils.setup import setup_llm
+from utils.setup import setup_model
 import os
 class LLM:
     def __init__(self,model_name,torch_dtype,device_map):
-        self.model, self.tokenizer = setup_llm(model_name,torch_dtype,device_map)
+        self.model, self.tokenizer = setup_model(model_name,torch_dtype,device_map)
         
     def generate(self, input_text,db_info, max_new_tokens=32,device_map="cuda"):
         llm__hyperparameters = os.readlink('LLM_hyperpara meters.json')

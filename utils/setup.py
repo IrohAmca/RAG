@@ -1,11 +1,15 @@
-from modules.rag_transformers import LLM ,LTK, SIM
+import sys
+import os
 
-def setup_llm(model_name, torch_dtype,device_map):
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from modules.rag_transformers import LLM, LTK
+
+def setup_model(model_name, torch_dtype="auto", device_map="cuda"):
     # Load model and tokenizer
-    model = LLM.from_pretrained(model_name,torch_dtype,device_map)
+    model = LLM.from_pretrained(model_name)
     tokenizer = LTK.from_pretrained(model_name)
     return model, tokenizer
 
-def setup_sim_st(model_name):
-    model = SIM('sentence-tranformers/'+model_name)
-    return model
+
+
