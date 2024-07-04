@@ -1,10 +1,9 @@
-from Database.db_functions.query import find,find_one
-from utils.special_name import find_special
+from Database.db_functions.query import find_one
 
-def get_query(client,SIM, database, collection, special,data):
-    result = find_one(client, database, collection, special)
-    
-    if result.get(data) != None:
-        return result.get(data)
-    else:
-        return "No data found"
+def get_query(client, database, collection, special, command):
+    print(f"Special: {special}")
+    result = find_one(client, database, collection, {"company_name": special})
+    print(f"Result: {result}")
+    data = result.get(command)
+    print(f"Data: {data}")
+    return data

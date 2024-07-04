@@ -1,9 +1,9 @@
-from utils.setup import  setup_model
+from utils.setup import setup_model
 import torch
 import torch.nn.functional as F
 class SentenceSim:
-    def __init__(self,name):
-        self.model ,self.tokenizer = setup_model(name)
+    def __init__(self,name,device_map='cuda'):
+        self.model ,self.tokenizer = setup_model(name,device_map=device_map)
     
     def mean_pooling(self, model_output, attention_mask):
         token_embeddings = model_output[0]
@@ -29,3 +29,16 @@ class SentenceSim:
 
         sorted_similarities = sorted(similarities, key=lambda x: x[2], reverse=True)[:top_k]
         return sorted_similarities
+    
+    def find_most_similar_sentence(self, prompt, sentences, top_k=5):
+        prompt_embedding = self.get_sentence_embedding(prompt)
+        embeddings = torch.vstack([self.get_sentence_embedding(sentence) for sentence in sentences])
+
+        similarities = []
+        for i, embedding in enumerate(embeddings):
+            similarity = F.cosine_similarity(prompt_embedding, embedding, dim=1)
+            similarities.append((sentences[i], similarity.item()))  
+
+        sorted_similarities = sorted(similarities, key=lambda x: x[1], reverse=True)[:top_k]
+        return sorted_similarities
+    
