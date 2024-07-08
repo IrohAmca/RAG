@@ -11,10 +11,10 @@ def dic_to_text(dic):
     return text
 
 
-def get_system_prompt(client, database, collection, SIM, prompt, rag_dict_list, special_list):
+def get_system_prompt(client, collection, SIM, prompt, rag_dict_list, special_list):
     label = find_special(SIM, prompt, special_list)[0][0]
     command = get_command(SIM, prompt, rag_dict_list)
-    result = get_query(client, database, collection, label, command)
+    result = get_query(client, collection, label, command)
     return dic_to_text(result)
 
 
