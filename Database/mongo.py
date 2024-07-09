@@ -6,7 +6,7 @@ class MongoDB:
         assert uri is not None, "MongoDB connection string is not provided."
         
         self.client = MongoClient(uri)
-        self.db = self.client.get_default_database()
+        self.db = self.client.get_default_database(default=db)
         self.collection = self.db[collection]
 
     def insert_data2collection(self, collection: str, data: dict):

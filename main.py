@@ -23,7 +23,7 @@ args = parser.parse_args()
 CWD = Path.cwd()
 
 LLM = LLM_("Qwen/Qwen2-1.5B-Instruct")
-SIM = SentenceSim("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", device_map="cpu")
+# SIM = SentenceSim("", device_map="cuda")
 
 uri = getenv("MONGO_LOCAL") if args.uselocal else getenv("MONGO_SERVER")
 mongo = MongoDB(uri, args.db, args.collection)
@@ -45,9 +45,8 @@ def main():
     while True:
         prompt = input("Enter your query: ")
         start_time = perf_counter()
-        db_info = get_system_prompt(mongo.client, args.collection, SIM, prompt, rag_dict_list, special_list)
-        print(db_info)
-        print(f"Qwen Yanıt: {LLM.generate(prompt,db_info,LLM_hyperparameters,max_new_tokens=128)}")
+        db_info = get_system_prompt(client=mongo, collection=args.collection,prompt= prompt,rag_dict_list= rag_dict_list, special_list=special_list)
+        print(f"Qwen Yanıt: {LLM.generate(prompt,db_info,LLM_hyperparameters,max_new_tokens=32)}")
         print(f"Response Time: {perf_counter()-start_time:.5f} seconds")
 
 if __name__ == "__main__":
