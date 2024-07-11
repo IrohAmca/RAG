@@ -1,3 +1,1 @@
-# RAG
-
-RAG model of STARS
+Simple RAG project
