@@ -4,6 +4,9 @@ from difflib import SequenceMatcher
 from utils.response_time import ShowResponseTime
 
 def find_special(SIM, text: str, special_list: dict) -> dict[str, tuple[str, str, float]]:
+    """
+    Find the most similar sentence from the special list.
+    """
     sentences = [i.strip() for i in re.split(r'[.!?]', text.lower())]
     special_keys = list(special_list.keys())
     

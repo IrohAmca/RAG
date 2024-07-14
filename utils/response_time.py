@@ -1,6 +1,13 @@
 from time import perf_counter
 
 class ShowResponseTime:
+    """
+    Context manager to show code execution time.
+    
+    :param msg: Optional message to print before the response time.
+    :type msg: str
+    """
+    
     def __init__(self, msg: str = None):
         self.msg = msg
     
