@@ -2,7 +2,6 @@ from typing import Any, Union
 
 import torch
 import torch.nn.functional as F
-import torch.cuda as cuda
 
 from Database.mongo import MongoDB
 

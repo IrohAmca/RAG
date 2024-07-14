@@ -1,50 +1,35 @@
-import dotenv
-import argparse
 import json
-from time import perf_counter
+from argparse import Namespace
 from pathlib import Path
-from os import getenv
 
-from Database.mongo import MongoDB
-from LLM.setup_model import LLM as LLM_
-from Sentence_Sim.SIM import get_query, SentenceSim, get_system_prompt, cuda
 
-from utils.special_name import find_special
-from utils.response_time import ShowResponseTime
+def main(args: Namespace, CWD = Path.cwd()):
+    from Database.mongo import MongoDB
+    from LLM.setup_model import LLM as LLM_
+    from Sentence_Sim.SIM import SentenceSim, get_query, get_system_prompt
+    from utils.response_time import ShowResponseTime
+    from utils.special_name import find_special
+    
+    print(f"Using {args.device.upper()} to run the model. (Change with -d argument)")
 
-dotenv.load_dotenv(".env")
-parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--device", type=str, help="Device to use", default="cuda" if cuda.is_available() else "cpu", choices=["cuda", "cpu"])
-parser_db = parser.add_argument_group("Database Arguments")
-parser_db.add_argument("--uselocal", action="store_true", help="Use local database instead of server. (uses: MONGO_LOCAL in .env)", default=False)
-parser_db.add_argument("--db", type=str, help="Database name (default: DATABASE in .env)", default=getenv("DATABASE"))
-parser_db.add_argument("--collection", type=str, help="Collection name (default: COLLECTION in .env)", default=getenv("COLLECTION"))
-args = parser.parse_args()
+    LLM = LLM_("Qwen/Qwen2-1.5B-Instruct", device_map=args.device)
+    # SIM = SentenceSim("", device_map="cuda")
 
-print(f"Using {args.device.upper()} to run the model. (Change with -d argument)")
+    mongo = MongoDB(args.mongo_uri, args.db, args.collection)
 
-CWD = Path.cwd()
+    rag_dict_file = "rag_dict.json"
+    special_list_file = "special_list.json"
+    LLM_hyperparameters_file = "LLM/LLM_hyperparameters.json"
 
-LLM = LLM_("Qwen/Qwen2-1.5B-Instruct", device_map=args.device)
-# SIM = SentenceSim("", device_map="cuda")
+    with open(CWD / rag_dict_file, encoding="utf-8") as f:
+        rag_dict_list = json.load(f)
 
-uri = getenv("MONGO_LOCAL") if args.uselocal else getenv("MONGO_SERVER")
-mongo = MongoDB(uri, args.db, args.collection)
+    with open(CWD / special_list_file, encoding="utf-8") as f:
+        special_list = json.load(f)
 
-rag_dict_file = "rag_dict.json"
-special_list_file = "special_list.json"
-LLM_hyperparameters_file = "LLM/LLM_hyperparameters.json"
-
-with open(CWD / rag_dict_file, encoding="utf-8") as f:
-    rag_dict_list = json.load(f)
-
-with open(CWD / special_list_file, encoding="utf-8") as f:
-    special_list = json.load(f)
-
-with open(CWD / LLM_hyperparameters_file, encoding="utf-8") as f:
-    LLM_hyperparameters = json.load(f)
-
-def main():
+    with open(CWD / LLM_hyperparameters_file, encoding="utf-8") as f:
+        LLM_hyperparameters = json.load(f)
+    
     while True:
         prompt = input("Enter your query: ")
         with ShowResponseTime():
@@ -52,4 +37,5 @@ def main():
             print(f"Qwen Yanıt: {LLM.generate(prompt,db_info,LLM_hyperparameters,max_new_tokens=32)}")
 
 if __name__ == "__main__":
-    main()
+    print("Do not run this file directly. Run `python .` instead.")
+    exit(1)
