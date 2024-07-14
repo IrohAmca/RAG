@@ -7,22 +7,25 @@ from os import getenv
 
 from Database.mongo import MongoDB
 from LLM.setup_model import LLM as LLM_
-from Sentence_Sim.get_query import get_query
-from Sentence_Sim.setup_model import SentenceSim
-from Sentence_Sim.sim_func import get_system_prompt
+from Sentence_Sim.SIM import get_query, SentenceSim, get_system_prompt, cuda
+
 from utils.special_name import find_special
+from utils.response_time import ShowResponseTime
 
 dotenv.load_dotenv(".env")
 parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--device", type=str, help="Device to use", default="cuda" if cuda.is_available() else "cpu", choices=["cuda", "cpu"])
 parser_db = parser.add_argument_group("Database Arguments")
 parser_db.add_argument("--uselocal", action="store_true", help="Use local database instead of server. (uses: MONGO_LOCAL in .env)", default=False)
 parser_db.add_argument("--db", type=str, help="Database name (default: DATABASE in .env)", default=getenv("DATABASE"))
 parser_db.add_argument("--collection", type=str, help="Collection name (default: COLLECTION in .env)", default=getenv("COLLECTION"))
 args = parser.parse_args()
 
+print(f"Using {args.device.upper()} to run the model. (Change with -d argument)")
+
 CWD = Path.cwd()
 
-LLM = LLM_("Qwen/Qwen2-1.5B-Instruct")
+LLM = LLM_("Qwen/Qwen2-1.5B-Instruct", device_map=args.device)
 # SIM = SentenceSim("", device_map="cuda")
 
 uri = getenv("MONGO_LOCAL") if args.uselocal else getenv("MONGO_SERVER")
@@ -44,10 +47,9 @@ with open(CWD / LLM_hyperparameters_file, encoding="utf-8") as f:
 def main():
     while True:
         prompt = input("Enter your query: ")
-        start_time = perf_counter()
-        db_info = get_system_prompt(client=mongo, collection=args.collection,prompt= prompt,rag_dict_list= rag_dict_list, special_list=special_list)
-        print(f"Qwen Yanıt: {LLM.generate(prompt,db_info,LLM_hyperparameters,max_new_tokens=32)}")
-        print(f"Response Time: {perf_counter()-start_time:.5f} seconds")
+        with ShowResponseTime():
+            db_info = get_system_prompt(dbclient=mongo, prompt= prompt, rag_dict_list= rag_dict_list, special_list=special_list)
+            print(f"Qwen Yanıt: {LLM.generate(prompt,db_info,LLM_hyperparameters,max_new_tokens=32)}")
 
 if __name__ == "__main__":
     main()

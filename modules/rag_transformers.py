@@ -1,9 +1,8 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from sentence_transformers import SentenceTransformer
-
 # Automodel and Autotokenizer modules
-LLM = AutoModelForCausalLM
-LTK = AutoTokenizer
+from transformers import (
+    AutoModelForCausalLM as LLM,
+    AutoTokenizer as LTK
+)
 
 # SentenceTransformer module
-SIM = SentenceTransformer
+from sentence_transformers import SentenceTransformer as SIM
