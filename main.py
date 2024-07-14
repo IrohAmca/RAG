@@ -2,8 +2,9 @@ import json
 from argparse import Namespace
 from pathlib import Path
 
+from config import LLM_MAX_NEW_TOKENS, rag_dict_file, special_list_file, LLM_hyperparameters_file
 
-def main(args: Namespace, CWD = Path.cwd()):
+def main(args: Namespace):
     from Database.mongo import MongoDB
     from LLM.setup_model import LLM as LLM_
     from Sentence_Sim.SIM import SentenceSim, get_query, get_system_prompt
@@ -17,24 +18,18 @@ def main(args: Namespace, CWD = Path.cwd()):
 
     mongo = MongoDB(args.mongo_uri, args.db, args.collection)
 
-    rag_dict_file = "rag_dict.json"
-    special_list_file = "special_list.json"
-    LLM_hyperparameters_file = "LLM/LLM_hyperparameters.json"
-
-    with open(CWD / rag_dict_file, encoding="utf-8") as f:
-        rag_dict_list = json.load(f)
-
-    with open(CWD / special_list_file, encoding="utf-8") as f:
-        special_list = json.load(f)
-
-    with open(CWD / LLM_hyperparameters_file, encoding="utf-8") as f:
-        LLM_hyperparameters = json.load(f)
+    with open(rag_dict_file, encoding="utf-8") as f_rag, \
+         open(special_list_file, encoding="utf-8") as f_special, \
+         open(LLM_hyperparameters_file, encoding="utf-8") as f_hyper:
+        rag_dict_list = json.load(f_rag)
+        special_list = json.load(f_special)
+        LLM_hyperparameters = json.load(f_hyper)
     
     while True:
         prompt = input("Enter your query: ")
         with ShowResponseTime():
-            db_info = get_system_prompt(dbclient=mongo, prompt= prompt, rag_dict_list= rag_dict_list, special_list=special_list)
-            print(f"Qwen Yanıt: {LLM.generate(prompt,db_info,LLM_hyperparameters,max_new_tokens=32)}")
+            db_info = get_system_prompt(dbclient=mongo, prompt=prompt, rag_dict_list=rag_dict_list, special_list=special_list)
+            print(f"Qwen Yanıt: {LLM.generate(prompt, db_info, LLM_hyperparameters, max_new_tokens=LLM_MAX_NEW_TOKENS)}")
 
 if __name__ == "__main__":
     print("Do not run this file directly. Run `python .` instead.")
