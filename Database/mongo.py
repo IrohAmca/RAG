@@ -7,7 +7,11 @@ class MongoDB:
         
         self.client = MongoClient(uri)
         self.db = self.client.get_default_database(default=db)
-        self.collection = self.db[collection]
+        self._collection = collection
+    
+    @property
+    def collection(self) -> Collection:
+        return self.db[self._collection]
 
     def insert_data2collection(self, collection: str, data: dict):
         c = self.db[collection]
@@ -41,6 +45,5 @@ class MongoDB:
         c = self.db[collection]
         return c.find(data)
 
-    def find_one(self, collection: str, data: dict):
-        c = self.db[collection]
-        return c.find_one(data)
+    def find_one(self, data: dict):
+        return self.collection.find_one(data)

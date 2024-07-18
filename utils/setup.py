@@ -1,5 +1,9 @@
-from modules.rag_transformers import LLM, LTK
-from transformers import AutoModel as SIM_Model , AutoTokenizer as SIM_Tokenizer
+from Modules import LLM, LTK
+from transformers import (
+    AutoModel as SIM_Model,
+    AutoTokenizer as SIM_Tokenizer
+)
+
 
 def setup_model(model_name, torch_dtype="auto", device_map="auto"):
     # Load model and tokenizer
