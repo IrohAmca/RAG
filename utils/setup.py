@@ -1,4 +1,4 @@
-from modules.rag_transformers import LLM, LTK
+from Modules import LLM, LTK
 from transformers import (
     AutoModel as SIM_Model,
     AutoTokenizer as SIM_Tokenizer
