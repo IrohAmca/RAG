@@ -11,7 +11,9 @@ LLM_MAX_NEW_TOKENS = 32
 
 # --- Paths ---
 CWD = Path.cwd()
-rag_dict_file            = CWD / "rag_dict.json"
-special_list_file        = CWD / "special_list.json"
-LLM_hyperparameters_file = CWD / "LLM" / "LLM_hyperparameters.json"
+RESOURCES = CWD / "Resources"
+
+rag_dict_file            = RESOURCES / "rag_dict.json"
+special_list_file        = RESOURCES / "special_list.json"
+LLM_hyperparameters_file = RESOURCES / "LLM_hyperparameters.json"
 # -------------
